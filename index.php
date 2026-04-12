@@ -1,37 +1,96 @@
 <?php
-// TODO 1: PREPARING ENVIRONMENT: 1) session 2) functions
+// TODO 1: PREPARING ENVIRONMENT
 session_start();
 
-// TODO 2: ROUTING
+// TODO 3: CODE by REQUEST METHODS (Обробник форми)
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-// TODO 3: CODE by REQUEST METHODS (ACTIONS) GET, POST, etc. (handle data from request): 1) validate 2) working with data source 3) transforming data
+    if (!empty($_POST['email']) && !empty($_POST['name']) && !empty($_POST['text'])) {
 
-// TODO 4: RENDER: 1) view (html) 2) data (from php)
+        $commentData = [
+                'email' => htmlspecialchars($_POST['email']),
+                'name'  => htmlspecialchars($_POST['name']),
+                'text'  => htmlspecialchars($_POST['text']),
+                'date'  => date('Y-m-d H:i:s')
+        ];
 
+        $jsonString = json_encode($commentData);
+
+        $fileStream = fopen("comments.csv", "a");
+        fwrite($fileStream, $jsonString . "\n");
+        fclose($fileStream);
+
+        $status = "success";
+    } else {
+        $status = "error";
+    }
+}
 ?>
 
 <!DOCTYPE html>
-<html>
-
-<?php require_once 'sectionHead.php' ?>
-
+<html lang="uk">
+<?php require_once 'sectionHead.php'; ?>
 <body>
 
 <div class="container">
-
-    <!-- navbar menu -->
-    <?php require_once 'sectionNavbar.php' ?>
+    <?php require_once 'sectionNavbar.php'; ?>
     <br>
 
-    <!-- guestbook section -->
-    <div class="card card-primary">
+    <div class="card card-primary mb-4">
         <div class="card-header bg-primary text-light">
-            Home page
+            Залишити запис у Гостьовій книзі
         </div>
         <div class="card-body">
+            <?php if (isset($status) && $status == 'success'): ?>
+                <div class="alert alert-success">Повідомлення збережено!</div>
+            <?php elseif (isset($status) && $status == 'error'): ?>
+                <div class="alert alert-danger">Будь ласка, заповніть усі поля!</div>
+            <?php endif; ?>
 
-            <!-- TODO: render php data   -->
+            <form action="index.php" method="POST">
+                <div class="mb-3">
+                    <label class="form-label">Email:</label>
+                    <input type="email" name="email" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Ім'я:</label>
+                    <input type="text" name="name" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Повідомлення:</label>
+                    <textarea name="text" class="form-control" rows="3" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Відправити</button>
+            </form>
+        </div>
+    </div>
 
+    <div class="card">
+        <div class="card-header bg-body-secondary text-dark">
+            Коментарі відвідувачів
+        </div>
+        <div class="card-body">
+            <?php
+            $filename = "comments.csv";
+            if (file_exists($filename)) {
+                $fileStream = fopen($filename, "r");
+
+                while (!feof($fileStream)) {
+                    $jsonString = fgets($fileStream);
+                    $comment = json_decode($jsonString, true);
+
+                    if (!empty($comment)) {
+                        echo "<div class='border-bottom mb-3 pb-2'>";
+                        echo "<strong>" . htmlspecialchars($comment['name']) . "</strong> <small class='text-muted'>(" . htmlspecialchars($comment['email']) . ")</small><br>";
+                        echo "<span>" . nl2br(htmlspecialchars($comment['text'])) . "</span>";
+                        echo "</div>";
+                    }
+                }
+                fclose($fileStream);
+            } else {
+                echo "Відгуків ще немає.";
+            }
+            ?>
         </div>
     </div>
 </div>
