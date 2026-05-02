@@ -1,0 +1,17 @@
+{
+    "name": "tylerdurden/practice_5",
+    "autoload": {
+        "psr-4": {
+            "Tylerdurden\\Practice5\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Nikita Pashchenko",
+            "email": "n.s.pashchenko@student.itc.khai.edu"
+        }
+    ],
+    "require": {
+        "symfony/var-dumper": "^7.4"
+    }
+}

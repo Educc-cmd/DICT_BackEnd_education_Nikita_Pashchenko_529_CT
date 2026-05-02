@@ -4,7 +4,7 @@ session_start();
 
 // TODO 2: ROUTING
 if (empty($_SESSION['auth'])) {
-    header('Location: /guestbook.php');
+    header('Location: /GuestbookController.php');
     die;
 }
 
